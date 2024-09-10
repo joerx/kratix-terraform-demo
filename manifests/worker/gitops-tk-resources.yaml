@@ -1,0 +1,54 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: Bucket
+metadata:
+  name: kratix-bucket
+  namespace: flux-system
+spec:
+  interval: 10s
+  provider: generic
+  bucketName: kratix
+  endpoint: 192.168.122.177:31337
+  insecure: true
+  secretRef:
+    name: minio-credentials
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-credentials
+  namespace: flux-system
+type: Opaque
+data:
+  accesskey: bWluaW9hZG1pbg==
+  secretkey: bWluaW9hZG1pbg==
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: kratix-workload-resources
+  namespace: flux-system
+spec:
+  interval: 3s
+  prune: true
+  dependsOn:
+    - name: kratix-workload-dependencies
+  sourceRef:
+    kind: Bucket
+    name: kratix-bucket
+  path: ./k3s-worker/resources
+  validation: client
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
+kind: Kustomization
+metadata:
+  name: kratix-workload-dependencies
+  namespace: flux-system
+spec:
+  interval: 8s
+  prune: true
+  sourceRef:
+    kind: Bucket
+    name: kratix-bucket
+  path: ./k3s-worker/dependencies
+  validation: client

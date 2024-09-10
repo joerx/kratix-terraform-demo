@@ -1,0 +1,8 @@
+apiVersion: example.promise.yodo.dev/v1
+kind: bucket
+metadata:
+  name: my-amazing-bucket
+spec:
+  name: my-amazing-bucket
+  region: eu-central-1
+  environment: dev
